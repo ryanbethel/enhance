@@ -22,7 +22,7 @@ module.exports = async function Enhancer(html, state, options={}) {
       if (isCustomElement(actualTagName)) {
         customElements[actualTagName] = actualTagName
         const template = getTemplate(actualTagName, templatePath, child.attributes)
-        fragment = JSDOM.fragment(template)
+        const fragment = JSDOM.fragment(template)
         templates[actualTagName] = templateElement(actualTagName, template)
         child.insertBefore(fragment, child.firstChild)
         const slots = child.querySelectorAll('slot[name]')

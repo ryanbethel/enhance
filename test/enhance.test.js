@@ -67,7 +67,7 @@ test('should update nested slots', async t=> {
   <my-paragraph>
     <span slot="my-text">Let's have some different text!</span>
     <my-paragraph>
-      <span slot="my-text">Let's have some different text!</span>
+      <span slot="my-text">Some other text</span>
     </my-paragraph>
   </my-paragraph>`
   const actual = await enhancer(input, {}, options)
@@ -83,7 +83,7 @@ test('should update nested slots', async t=> {
     </p>
     <my-paragraph>
       <p>
-        <span slot="my-text">Let's have some different text!</span>
+        <span slot="my-text">Some other text</span>
       </p>
     </my-paragraph>
   </my-paragraph>
