@@ -13,9 +13,9 @@ test('enhancer should exist', t=> {
   t.end()
 })
 
-test('should output template', async t=> {
+test('should output template', t=> {
   const input = `<my-paragraph></my-paragraph>`
-  const actual = await enhancer(input, {}, options)
+  const actual = enhancer(input, {}, options)
   const expected = doc(`
 <template id="my-paragraph-template">
   <p>
@@ -35,12 +35,12 @@ test('should output template', async t=> {
   t.end()
 })
 
-test('should update slot', async t=> {
+test('should update slot', t=> {
   const input = `
   <my-paragraph>
     <span slot="my-text">Let's have some different text!</span>
   </my-paragraph>`
-  const actual = await enhancer(input, {}, options)
+  const actual = enhancer(input, {}, options)
   const expected = doc(`
 <template id="my-paragraph-template">
   <p>
@@ -62,7 +62,7 @@ test('should update slot', async t=> {
   t.end()
 })
 
-test('should update nested slots', async t=> {
+test('should update nested slots', t=> {
   const input = `
   <my-paragraph>
     <span slot="my-text">Let's have some different text!</span>
@@ -70,7 +70,7 @@ test('should update nested slots', async t=> {
       <span slot="my-text">Some other text</span>
     </my-paragraph>
   </my-paragraph>`
-  const actual = await enhancer(input, {}, options)
+  const actual = enhancer(input, {}, options)
   const expected = doc(`
 <template id="my-paragraph-template">
   <p>

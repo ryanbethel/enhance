@@ -5,7 +5,7 @@ const isCustomElement = require('./lib/is-custom-element')
 const TEMPLATE_PATH = `../views/templates`
 const MODULE_PATH = '/modules'
 
-module.exports = async function Enhancer(html, state, options={}) {
+module.exports = function Enhancer(html, state, options={}) {
   const {
     templatePath=TEMPLATE_PATH,
     modulePath=MODULE_PATH
