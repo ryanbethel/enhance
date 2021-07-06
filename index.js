@@ -23,7 +23,7 @@ module.exports = function Enhancer(html, state, options={}) {
         customElements[actualTagName] = actualTagName
         const template = getTemplate(actualTagName, templatePath, child.attributes)
         const fragment = JSDOM.fragment(template)
-        templates[actualTagName] = templateElement(actualTagName, template)
+        templates[actualTagName] = templateElement(actualTagName, getTemplate(actualTagName, templatePath))
         child.insertBefore(fragment, child.firstChild)
         const slots = child.querySelectorAll('slot[name]')
         const inserts = child.querySelectorAll('[slot]')
@@ -59,7 +59,7 @@ function normalizeAttrs(o, x = {}) {
 
 function getTemplate(tagName, templatePath, attrs) {
   return require(`${templatePath}/${tagName}.js`)
-    .default(normalizeAttrs(attrs))
+    .default(attrs && normalizeAttrs(attrs))
 }
 
 function templateElement(tagName, children) {

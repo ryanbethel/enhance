@@ -98,3 +98,27 @@ test('should update nested slots', t=> {
   )
   t.end()
 })
+
+test('should pass attributes as state', t=> {
+  const input = `
+<my-link href='/yolo' text='sketchy'></my-link>
+`
+  const actual = enhancer(input, {}, options)
+  const expected = doc(`
+<template id="my-link-template">
+  <a href=""></a>
+</template>
+<my-link href="/yolo" text="sketchy">
+  <a href="/yolo">sketchy</a>
+</my-link>
+<script src="/modules/my-link.js" type="module" crossorigin=""></script>
+`)
+  console.log('ACTUAL: ', actual, '\n')
+  console.log('\nEXPECTED: ', expected, '\n')
+  t.equal(
+    strip(actual),
+    strip(expected),
+    'Passes attributes as state'
+  )
+  t.end()
+})
