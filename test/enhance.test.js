@@ -15,7 +15,7 @@ test('enhancer should exist', t=> {
 
 test('should output template', t=> {
   const input = `<my-paragraph></my-paragraph>`
-  const actual = enhancer(input, {}, options)
+  const actual = enhancer(input, options)
   const expected = doc(`
 <template id="my-paragraph-template">
   <p>
@@ -40,7 +40,7 @@ test('should update slot', t=> {
   <my-paragraph>
     <span slot="my-text">Let's have some different text!</span>
   </my-paragraph>`
-  const actual = enhancer(input, {}, options)
+  const actual = enhancer(input, options)
   const expected = doc(`
 <template id="my-paragraph-template">
   <p>
@@ -70,7 +70,7 @@ test('should update nested slots', t=> {
       <span slot="my-text">Some other text</span>
     </my-paragraph>
   </my-paragraph>`
-  const actual = enhancer(input, {}, options)
+  const actual = enhancer(input, options)
   const expected = doc(`
 <template id="my-paragraph-template">
   <p>
@@ -103,7 +103,7 @@ test('should pass attributes as state', t=> {
   const input = `
 <my-link href='/yolo' text='sketchy'></my-link>
 `
-  const actual = enhancer(input, {}, options)
+  const actual = enhancer(input, options)
   const expected = doc(`
 <template id="my-link-template">
   <a href=""></a>
