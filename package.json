@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "tape ./test/*.test.js | tap-spec"
+    "test": "tape -r esm ./test/*.test.js | tap-spec"
   },
   "keywords": [],
   "author": "kj <kj@begin.com>",
