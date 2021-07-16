@@ -12,7 +12,7 @@ function Enhancer(options={}) {
     modulePath=MODULE_PATH
   } = options
 
-  return function html(strings, ...values) {
+  function html(strings, ...values) {
     const collect = []
     for (let i = 0; i < strings.length - 1; i++) {
       collect.push(strings[i], encode(values[i]))
@@ -71,7 +71,7 @@ function Enhancer(options={}) {
 
   function getTemplate(tagName, templatePath, attrs) {
     return require(`${templatePath}/${tagName}.js`)
-      .default(attrs && attrsToState(attrs))
+      .default(attrs && attrsToState(attrs), html)
   }
 
   function templateElement(tagName, children) {
@@ -87,6 +87,8 @@ function Enhancer(options={}) {
   <script src="${modulePath}/${customElement}.js" type="module" crossorigin></script>
     `
   }
+
+  return html
 }
 
 const state = {}

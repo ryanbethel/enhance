@@ -127,6 +127,28 @@ test('should update nested slots', t=> {
   t.end()
 })
 
+
+test('should treat number attribute as pass through', t=> {
+  const actual = html`
+<my-counter count=5></my-counter>
+  `
+  const expected = doc(`
+<template id="my-counter-template">
+  <h3>Count: 0</h3>
+</template>
+<my-counter count="5">
+  <h3>Count: 5</h3>
+</my-counter>
+<script src="/modules/my-counter.js" type="module" crossorigin=""></script>
+`)
+  t.equal(
+    strip(actual),
+    strip(expected),
+    'Treats numbers as pass through'
+  )
+  t.end()
+})
+
 test('should pass attributes as state', t=> {
   const actual = html`
 <my-link href='/yolo' text='sketchy'></my-link>
@@ -158,7 +180,7 @@ test('should pass attribute array values correctly', t => {
   <ul>
   </ul>
 </template>
-<my-list items="__b_0">
+<my-list items="__b_2">
   <ul>
     <li>one</li>
     <li>two</li>
@@ -173,6 +195,36 @@ test('should pass attribute array values correctly', t => {
     strip(actual),
     strip(expected),
     'Passes complex attribute as state'
+  )
+  t.end()
+})
+
+test('should render nested custom elements', t=> {
+  const things = [{ title: 'one' },{ title: 'two' },{ title: 'three' }]
+  const actual = html`
+<my-page items=${things}></my-page>
+  `
+  const expected = doc(`
+<template id="my-page-template">
+  <my-content></my-content>
+</template>
+<my-page items="__b_2">
+  <my-content items="__b_3">
+    <h3>Content</h3>
+    <ul>
+      <li>one<li>
+      <li>two</li>
+      <li>three</li>
+    </ul>
+  </my-content>
+</my-page>
+<script src="/modules/my-page.js" type="module" crossorigin=""></script>
+<script src="/modules/my-content.js" type="module" crossorigin=""></script>
+`)
+  t.equal(
+    strip(actual),
+    strip(expected),
+    'Treats numbers as pass through'
   )
   t.end()
 })
