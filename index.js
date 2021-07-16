@@ -19,8 +19,7 @@ function Enhancer(options={}) {
     }
     collect.push(strings[strings.length - 1])
 
-    const customElements = {}
-    const templates = {}
+    const webComponents = {}
     const dom = new JSDOM(collect.join(''))
     const body = dom.window.document.body
     const findCustomElements = node => {
@@ -29,12 +28,10 @@ function Enhancer(options={}) {
         const { tagName } = child
         const actualTagName = tagName && tagName.toLowerCase()
         if (isCustomElement(actualTagName)) {
-          customElements[actualTagName] = actualTagName
+          webComponents[actualTagName] = actualTagName
 
           const template = getTemplate(actualTagName, templatePath, child.attributes)
           const fragment = JSDOM.fragment(template)
-          templates[actualTagName] = templateElement(actualTagName, getTemplate(actualTagName, templatePath))
-
           child.insertBefore(fragment, child.firstChild)
           const slots = child.querySelectorAll('slot[name]')
           const inserts = child.querySelectorAll('[slot]')
@@ -56,10 +53,8 @@ function Enhancer(options={}) {
     }
     findCustomElements(body)
 
-    Object.keys(templates)
-      .forEach(key => body.insertBefore(JSDOM.fragment(templates[key]), body.firstChild))
-    Object.keys(customElements)
-      .forEach(key => body.append(JSDOM.fragment(scriptTag(modulePath, customElements[key]))))
+    Object.keys(webComponents)
+      .forEach(key => body.append(JSDOM.fragment(scriptTag(modulePath, webComponents[key]))))
 
     return dom.serialize()
   }
@@ -72,14 +67,6 @@ function Enhancer(options={}) {
   function getTemplate(tagName, templatePath, attrs) {
     return require(`${templatePath}/${tagName}.js`)
       .default(attrs && attrsToState(attrs), html)
-  }
-
-  function templateElement(tagName, children) {
-    return `
-  <template id="${tagName}-template">
-    ${children}
-  </template>
-  `
   }
 
   function scriptTag(modulePath, customElement) {

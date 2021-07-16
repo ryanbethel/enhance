@@ -49,11 +49,6 @@ test('should encode array of objects', t=> {
 test('should output template', t=> {
   const actual = html`<my-paragraph></my-paragraph>`
   const expected = doc(`
-<template id="my-paragraph-template">
-  <p>
-    <slot name="my-text">My default text</slot>
-  </p>
-</template>
 <my-paragraph>
   <p><slot name="my-text">My default text</slot></p>
 </my-paragraph>
@@ -73,11 +68,6 @@ test('should update slot', t=> {
     <span slot="my-text">Let's have some different text!</span>
   </my-paragraph>`
   const expected = doc(`
-<template id="my-paragraph-template">
-  <p>
-    <slot name="my-text">My default text</slot>
-  </p>
-</template>
   <my-paragraph>
     <p>
       <span slot="my-text">Let's have some different text!</span>
@@ -102,11 +92,6 @@ test('should update nested slots', t=> {
     </my-paragraph>
   </my-paragraph>`
   const expected = doc(`
-<template id="my-paragraph-template">
-  <p>
-    <slot name="my-text">My default text</slot>
-  </p>
-</template>
   <my-paragraph>
     <p>
       <span slot="my-text">Let's have some different text!</span>
@@ -133,9 +118,6 @@ test('should treat number attribute as pass through', t=> {
 <my-counter count=5></my-counter>
   `
   const expected = doc(`
-<template id="my-counter-template">
-  <h3>Count: 0</h3>
-</template>
 <my-counter count="5">
   <h3>Count: 5</h3>
 </my-counter>
@@ -154,9 +136,6 @@ test('should pass attributes as state', t=> {
 <my-link href='/yolo' text='sketchy'></my-link>
 `
   const expected = doc(`
-<template id="my-link-template">
-  <a href=""></a>
-</template>
 <my-link href="/yolo" text="sketchy">
   <a href="/yolo">sketchy</a>
 </my-link>
@@ -176,10 +155,6 @@ test('should pass attribute array values correctly', t => {
 <my-list items="${things}"></my-list>
 `
   const expected = doc(`
-<template id="my-list-template">
-  <ul>
-  </ul>
-</template>
 <my-list items="__b_2">
   <ul>
     <li>one</li>
@@ -205,9 +180,6 @@ test('should render nested custom elements', t=> {
 <my-page items=${things}></my-page>
   `
   const expected = doc(`
-<template id="my-page-template">
-  <my-content></my-content>
-</template>
 <my-page items="__b_2">
   <my-content items="__b_3">
     <h3>Content</h3>
@@ -220,11 +192,12 @@ test('should render nested custom elements', t=> {
 </my-page>
 <script src="/modules/my-page.js" type="module" crossorigin=""></script>
 <script src="/modules/my-content.js" type="module" crossorigin=""></script>
+<script src="/modules/my-list.js" type="module" crossorigin=""></script>
 `)
   t.equal(
     strip(actual),
     strip(expected),
-    'Treats numbers as pass through'
+    'Renders nested custom elements by passing html function'
   )
   t.end()
 })
