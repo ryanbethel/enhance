@@ -44,10 +44,9 @@ function Enhancer(options={}) {
       })
   }
 
+  // FIXME: this needs to fill slots as well
   function nested(strings, ...values) {
-    const collect = render(strings, ...values)
-    const dom = new JSDOM(collect.join(''))
-    return dom.serialize()
+    return render(strings, ...values).join('')
   }
 
   function render(strings, ...values) {
@@ -61,9 +60,9 @@ function Enhancer(options={}) {
 
   function html(strings, ...values) {
     const webComponents = {}
+    // FIXME: this needs to be fixed
     state = {}
-    const collect = render(strings, ...values)
-    const dom = new JSDOM(collect.join(''))
+    const dom = new JSDOM(render(strings, ...values).join(''))
     const body = dom.window.document.body
     findCustomElements(body, webComponents)
 

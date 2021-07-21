@@ -164,8 +164,6 @@ test('should pass attribute array values correctly', t => {
 </my-list>
 <script src="/modules/my-list.js" type="module" crossorigin=""></script>
   `)
-  console.log('ACTUAL: ', actual, '\n')
-  console.log('\nEXPECTED: ', expected, '\n')
   t.equal(
     strip(actual),
     strip(expected),
@@ -182,7 +180,9 @@ test('should render nested custom elements', t=> {
   const expected = doc(`
 <my-page items="__b_3">
   <my-content items="__b_4">
-    <h3>Content</h3>
+    <h3>
+      Content
+    </h3>
     <my-list items="__b_5">
       <ul>
         <li>one</li>
