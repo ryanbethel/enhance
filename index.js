@@ -12,46 +12,60 @@ function Enhancer(options={}) {
     modulePath=MODULE_PATH
   } = options
 
-  function html(strings, ...values) {
+  function findCustomElements(node, webComponents) {
+    const childNodes = node.childNodes
+    childNodes.forEach(child => {
+      const { tagName } = child
+      const actualTagName = tagName && tagName.toLowerCase()
+      if (isCustomElement(actualTagName)) {
+        webComponents[actualTagName] = actualTagName
+        const template = renderTemplate(actualTagName, templatePath, child.attributes)
+        child.insertBefore(JSDOM.fragment(template), child.firstChild)
+        fillSlots(child)
+      }
+
+      if (child.childNodes) {
+        findCustomElements(child, webComponents)
+      }
+    })
+  }
+
+  function fillSlots(child) {
+      const slots = child.querySelectorAll('slot[name]')
+      const inserts = child.querySelectorAll('[slot]')
+      slots.forEach(slot => {
+        const slotName = slot.getAttribute('name')
+        inserts.forEach(insert => {
+          const insertSlot = insert.getAttribute('slot')
+          if (slotName === insertSlot) {
+            slot.replaceWith(insert)
+          }
+        })
+      })
+  }
+
+  function nested(strings, ...values) {
+    const collect = render(strings, ...values)
+    const dom = new JSDOM(collect.join(''))
+    return dom.serialize()
+  }
+
+  function render(strings, ...values) {
     const collect = []
     for (let i = 0; i < strings.length - 1; i++) {
       collect.push(strings[i], encode(values[i]))
     }
     collect.push(strings[strings.length - 1])
+    return collect
+  }
 
+  function html(strings, ...values) {
     const webComponents = {}
+    state = {}
+    const collect = render(strings, ...values)
     const dom = new JSDOM(collect.join(''))
     const body = dom.window.document.body
-    const findCustomElements = node => {
-      const childNodes = node.childNodes
-      childNodes.forEach(child => {
-        const { tagName } = child
-        const actualTagName = tagName && tagName.toLowerCase()
-        if (isCustomElement(actualTagName)) {
-          webComponents[actualTagName] = actualTagName
-
-          const template = getTemplate(actualTagName, templatePath, child.attributes)
-          const fragment = JSDOM.fragment(template)
-          child.insertBefore(fragment, child.firstChild)
-          const slots = child.querySelectorAll('slot[name]')
-          const inserts = child.querySelectorAll('[slot]')
-          slots.forEach(slot => {
-            const slotName = slot.getAttribute('name')
-            inserts.forEach(insert => {
-              const insertSlot = insert.getAttribute('slot')
-              if (slotName === insertSlot) {
-                slot.replaceWith(insert)
-              }
-            })
-          })
-        }
-
-        if (child.childNodes) {
-          findCustomElements(child)
-        }
-      })
-    }
-    findCustomElements(body)
+    findCustomElements(body, webComponents)
 
     Object.keys(webComponents)
       .forEach(key => body.append(JSDOM.fragment(scriptTag(modulePath, webComponents[key]))))
@@ -64,9 +78,9 @@ function Enhancer(options={}) {
     return state
   }
 
-  function getTemplate(tagName, templatePath, attrs) {
+  function renderTemplate(tagName, templatePath, attrs) {
     return require(`${templatePath}/${tagName}.js`)
-      .default(attrs && attrsToState(attrs), html)
+      .default(attrs && attrsToState(attrs), nested)
   }
 
   function scriptTag(modulePath, customElement) {
@@ -78,7 +92,7 @@ function Enhancer(options={}) {
   return html
 }
 
-const state = {}
+let state = {}
 let place = 0
 export function encode(value) {
   if (typeof value !== 'string') {

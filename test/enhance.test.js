@@ -180,14 +180,16 @@ test('should render nested custom elements', t=> {
 <my-page items=${things}></my-page>
   `
   const expected = doc(`
-<my-page items="__b_2">
-  <my-content items="__b_3">
+<my-page items="__b_3">
+  <my-content items="__b_4">
     <h3>Content</h3>
-    <ul>
-      <li>one<li>
-      <li>two</li>
-      <li>three</li>
-    </ul>
+    <my-list items="__b_5">
+      <ul>
+        <li>one</li>
+        <li>two</li>
+        <li>three</li>
+      </ul>
+    </my-list>
   </my-content>
 </my-page>
 <script src="/modules/my-page.js" type="module" crossorigin=""></script>
