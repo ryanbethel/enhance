@@ -1,10 +1,10 @@
 require = require('esm')(module)
+const path = require('path')
 const jsdom = require('jsdom')
 const { JSDOM } = jsdom
 const isCustomElement = require('./lib/is-custom-element')
-const TEMPLATE_PATH = `../views/templates`
-const MODULE_PATH = '/modules'
-
+const TEMPLATE_PATH = path.join('..', 'views', 'templates')
+const MODULE_PATH = path.join('modules')
 
 function Enhancer(options={}) {
   const {
@@ -12,39 +12,42 @@ function Enhancer(options={}) {
     modulePath=MODULE_PATH
   } = options
 
-  function findCustomElements(node, webComponents) {
+  function getActualTagName(node) {
+    const { tagName } = node
+    return tagName && tagName.toLowerCase()
+  }
+
+  function findCustomElements(node, customElements) {
     const childNodes = node.childNodes
     childNodes.forEach(child => {
-      const { tagName } = child
-      const actualTagName = tagName && tagName.toLowerCase()
+      const actualTagName = getActualTagName(child)
       if (isCustomElement(actualTagName)) {
-        webComponents[actualTagName] = actualTagName
         const template = renderTemplate(actualTagName, templatePath, child.attributes)
         child.insertBefore(JSDOM.fragment(template), child.firstChild)
         fillSlots(child)
+        customElements.push(child)
       }
 
       if (child.childNodes) {
-        findCustomElements(child, webComponents)
+        findCustomElements(child, customElements)
       }
     })
   }
 
-  function fillSlots(child) {
-      const slots = child.querySelectorAll('slot[name]')
-      const inserts = child.querySelectorAll('[slot]')
-      slots.forEach(slot => {
-        const slotName = slot.getAttribute('name')
-        inserts.forEach(insert => {
-          const insertSlot = insert.getAttribute('slot')
-          if (slotName === insertSlot) {
-            slot.replaceWith(insert)
-          }
-        })
+  function fillSlots(node) {
+    const slots = node.querySelectorAll('slot[name]')
+    const inserts = node.querySelectorAll('[slot]')
+    slots.forEach(slot => {
+      const slotName = slot.getAttribute('name')
+      inserts.forEach(insert => {
+        const insertSlot = insert.getAttribute('slot')
+        if (slotName === insertSlot) {
+          slot.replaceWith(insert)
+        }
       })
+    })
   }
 
-  // FIXME: this needs to fill slots as well
   function nested(strings, ...values) {
     return render(strings, ...values).join('')
   }
@@ -58,13 +61,21 @@ function Enhancer(options={}) {
     return collect
   }
 
+  function getWebComponents(acc, el) {
+    const actualTagName = getActualTagName(el)
+    acc[actualTagName] = actualTagName
+    return acc
+  }
+
   function html(strings, ...values) {
-    const webComponents = {}
-    // FIXME: this needs to be fixed
+    const customElements = []
+    // FIXME: state should be passed or created not in outer scope
     state = {}
     const dom = new JSDOM(render(strings, ...values).join(''))
     const body = dom.window.document.body
-    findCustomElements(body, webComponents)
+    findCustomElements(body, customElements)
+    customElements.forEach(node => fillSlots(node))
+    const webComponents = customElements.reduce(getWebComponents, {})
 
     Object.keys(webComponents)
       .forEach(key => body.append(JSDOM.fragment(scriptTag(modulePath, webComponents[key]))))
@@ -84,7 +95,7 @@ function Enhancer(options={}) {
 
   function scriptTag(modulePath, customElement) {
     return `
-  <script src="${modulePath}/${customElement}.js" type="module" crossorigin></script>
+  <script src="/${modulePath}/${customElement}.js" type="module" crossorigin></script>
     `
   }
 

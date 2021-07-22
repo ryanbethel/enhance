@@ -181,7 +181,43 @@ test('should render nested custom elements', t=> {
 <my-page items="__b_3">
   <my-content items="__b_4">
     <h3>
-      Content
+      <slot name="title">Content</slot>
+    </h3>
+    <my-list items="__b_5">
+      <ul>
+        <li>one</li>
+        <li>two</li>
+        <li>three</li>
+      </ul>
+    </my-list>
+  </my-content>
+</my-page>
+<script src="/modules/my-page.js" type="module" crossorigin=""></script>
+<script src="/modules/my-content.js" type="module" crossorigin=""></script>
+<script src="/modules/my-list.js" type="module" crossorigin=""></script>
+`)
+  t.equal(
+    strip(actual),
+    strip(expected),
+    'Renders nested custom elements by passing html function'
+  )
+  t.end()
+})
+
+test('should fill nested rendered slots', t=> {
+  const things = [{ title: 'one' },{ title: 'two' },{ title: 'three' }]
+  const actual = html`
+    <my-page items=${things}>
+      <my-content>
+        <span slot=title>YOLO</span>
+      </my-content>
+    </my-page>
+  `
+  const expected = doc(`
+<my-page items="__b_3">
+  <my-content items="__b_4">
+    <h3>
+      <span slot="title">YOLO</span>
     </h3>
     <my-list items="__b_5">
       <ul>
