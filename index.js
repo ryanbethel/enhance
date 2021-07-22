@@ -1,7 +1,6 @@
 require = require('esm')(module)
 const path = require('path')
-const jsdom = require('jsdom')
-const { JSDOM } = jsdom
+const { parse, fragment } = require('@begin/jsdom')
 const isCustomElement = require('./lib/is-custom-element')
 const TEMPLATE_PATH = path.join('..', 'views', 'templates')
 const MODULE_PATH = path.join('modules')
@@ -23,7 +22,7 @@ function Enhancer(options={}) {
       const actualTagName = getActualTagName(child)
       if (isCustomElement(actualTagName)) {
         const template = renderTemplate(actualTagName, templatePath, child.attributes)
-        child.insertBefore(JSDOM.fragment(template), child.firstChild)
+        child.insertBefore(fragment(template), child.firstChild)
         fillSlots(child)
         customElements.push(child)
       }
@@ -71,14 +70,14 @@ function Enhancer(options={}) {
     const customElements = []
     // FIXME: state should be passed or created not in outer scope
     state = {}
-    const dom = new JSDOM(render(strings, ...values).join(''))
+    const dom = parse(render(strings, ...values).join(''))
     const body = dom.window.document.body
     findCustomElements(body, customElements)
     customElements.forEach(node => fillSlots(node))
     const webComponents = customElements.reduce(getWebComponents, {})
 
     Object.keys(webComponents)
-      .forEach(key => body.append(JSDOM.fragment(scriptTag(modulePath, webComponents[key]))))
+      .forEach(key => body.append(fragment(scriptTag(modulePath, webComponents[key]))))
 
     return dom.serialize()
   }
