@@ -22,7 +22,7 @@ function Enhancer(options={}) {
       const actualTagName = getActualTagName(child)
       if (isCustomElement(actualTagName)) {
         const template = renderTemplate(actualTagName, templatePath, child.attributes)
-        child.insertBefore(fragment(template), child.firstChild)
+        child.append(fragment(template))
         fillSlots(child)
         customElements.push(child)
       }

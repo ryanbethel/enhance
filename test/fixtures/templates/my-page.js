@@ -1,6 +1,9 @@
 export default function MyPage(state={}, html) {
   const { items=[] } = state
   return html`
-<my-content items=${items}></my-content>
+<h1>My Page</h1>
+<my-content items=${items}>
+  <h3 slot=title>YOLO</h3>
+</my-content>
   `
 }

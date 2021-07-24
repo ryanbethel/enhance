@@ -156,6 +156,9 @@ test('should pass attribute array values correctly', t => {
 `
   const expected = doc(`
 <my-list items="__b_2">
+  <slot name="title">
+    <h4>My list</h4>
+  </slot>
   <ul>
     <li>one</li>
     <li>two</li>
@@ -179,11 +182,14 @@ test('should render nested custom elements', t=> {
   `
   const expected = doc(`
 <my-page items="__b_3">
+  <h1>My Page</h1>
   <my-content items="__b_4">
-    <h3>
-      <slot name="title">Content</slot>
+    <h2>My Content</h2>
+    <h3 slot="title">
+      YOLO
     </h3>
     <my-list items="__b_5">
+      <h4 slot="title">Content List</h4>
       <ul>
         <li>one</li>
         <li>two</li>
@@ -204,31 +210,50 @@ test('should render nested custom elements', t=> {
   t.end()
 })
 
-test('should fill nested rendered slots', t=> {
+test('should fill slots', t=> {
   const things = [{ title: 'one' },{ title: 'two' },{ title: 'three' }]
   const actual = html`
-    <my-page items=${things}>
-      <my-content>
-        <span slot=title>YOLO</span>
-      </my-content>
-    </my-page>
+<my-list items=${things}>
+  <h4 slot=title>Slotted title</h4>
+</my-list>
   `
   const expected = doc(`
-<my-page items="__b_3">
-  <my-content items="__b_4">
-    <h3>
-      <span slot="title">YOLO</span>
-    </h3>
-    <my-list items="__b_5">
-      <ul>
-        <li>one</li>
-        <li>two</li>
-        <li>three</li>
-      </ul>
-    </my-list>
-  </my-content>
-</my-page>
-<script src="/modules/my-page.js" type="module" crossorigin=""></script>
+<my-list items="__b_6">
+  <h4 slot="title">Slotted title</h4>
+  <ul>
+    <li>one</li>
+    <li>two</li>
+    <li>three</li>
+  </ul>
+</my-list>
+<script src="/modules/my-list.js" type="module" crossorigin=""></script>
+`)
+  t.equal(strip(actual), strip(expected), 'fills slots correctly')
+  t.end()
+})
+
+test('should fill nested rendered slots', t=> {
+  const items = [{ title: 'one' },{ title: 'two' },{ title: 'three' }]
+  const actual = html`
+<my-content items="${items}">
+  <span slot=title>YOLO</span>
+</my-content>
+  `
+  const expected = doc(`
+<my-content items="__b_7">
+  <h2>My Content</h2>
+  <span slot="title">
+    YOLO
+  </span>
+  <my-list items="__b_8">
+    <h4 slot="title">Content List</h4>
+    <ul>
+      <li>one</li>
+      <li>two</li>
+      <li>three</li>
+    </ul>
+  </my-list>
+</my-content>
 <script src="/modules/my-content.js" type="module" crossorigin=""></script>
 <script src="/modules/my-list.js" type="module" crossorigin=""></script>
 `)
