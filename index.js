@@ -1,107 +1,168 @@
-require = require('esm')(module)
-const path = require('path')
-const { parse, fragment } = require('@begin/jsdom')
-const isCustomElement = require('./lib/is-custom-element')
-const TEMPLATE_PATH = path.join('..', 'views', 'templates')
-const MODULE_PATH = path.join('modules')
+import path from 'path'
+import { parse, parseFragment as fragment, serialize } from 'parse5'
+import isCustomElement from './lib/is-custom-element.js'
+const TEMPLATES = path.join('..', 'views', 'templates')
+const MODULES = path.join('modules')
 
-function Enhancer(options={}) {
+export default function Enhancer(options={}) {
   const {
-    templatePath=TEMPLATE_PATH,
-    modulePath=MODULE_PATH
+    templates=TEMPLATES,
+    modules=MODULES
   } = options
 
-  function getActualTagName(node) {
-    const { tagName } = node
-    return tagName && tagName.toLowerCase()
-  }
-
-  function findCustomElements(node, customElements) {
-    const childNodes = node.childNodes
-    childNodes.forEach(child => {
-      const actualTagName = getActualTagName(child)
-      if (isCustomElement(actualTagName)) {
-        const template = renderTemplate(actualTagName, templatePath, child.attributes)
-        child.append(fragment(template))
-        fillSlots(child)
-        customElements.push(child)
-      }
-
-      if (child.childNodes) {
-        findCustomElements(child, customElements)
-      }
-    })
-  }
-
-  function fillSlots(node) {
-    const slots = node.querySelectorAll('slot[name]')
-    const inserts = node.querySelectorAll('[slot]')
-    slots.forEach(slot => {
-      const slotName = slot.getAttribute('name')
-      inserts.forEach(insert => {
-        const insertSlot = insert.getAttribute('slot')
-        if (slotName === insertSlot) {
-          slot.replaceWith(insert)
-        }
-      })
-    })
-  }
-
-  function nested(strings, ...values) {
-    return render(strings, ...values).join('')
-  }
-
-  function render(strings, ...values) {
-    const collect = []
-    for (let i = 0; i < strings.length - 1; i++) {
-      collect.push(strings[i], encode(values[i]))
-    }
-    collect.push(strings[strings.length - 1])
-    return collect
-  }
-
-  function getWebComponents(acc, el) {
-    const actualTagName = getActualTagName(el)
-    acc[actualTagName] = actualTagName
-    return acc
-  }
-
   function html(strings, ...values) {
-    const customElements = []
-    // FIXME: state should be passed or created not in outer scope
-    state = {}
-    const dom = parse(render(strings, ...values).join(''))
-    const body = dom.window.document.body
-    findCustomElements(body, customElements)
-    customElements.forEach(node => fillSlots(node))
-    const webComponents = customElements.reduce(getWebComponents, {})
-
-    Object.keys(webComponents)
-      .forEach(key => body.append(fragment(scriptTag(modulePath, webComponents[key]))))
-
-    return dom.serialize()
-  }
-
-  function attrsToState(attrs, state={}) {
-    [...attrs].forEach(attr => state[attr.name] = decode(attr.value))
-    return state
-  }
-
-  function renderTemplate(tagName, templatePath, attrs) {
-    return require(`${templatePath}/${tagName}.js`)
-      .default(attrs && attrsToState(attrs), nested)
-  }
-
-  function scriptTag(modulePath, customElement) {
-    return `
-  <script src="/${modulePath}/${customElement}.js" type="module" crossorigin></script>
-    `
+    const doc = parse(render(strings, ...values))
+    const body = doc.childNodes[0].childNodes[1]
+    const customElements = processCustomElements(doc, templates)
+    const moduleNames = [...new Set(customElements.map(node =>  node.tagName))]
+    const scripts = fragment(moduleNames.map(name => script(modules, name)).join(''))
+    addScriptTags(body, scripts)
+    return serialize(doc)
   }
 
   return html
 }
 
-let state = {}
+function render(strings, ...values) {
+  const collect = []
+  for (let i = 0; i < strings.length - 1; i++) {
+    collect.push(strings[i], encode(values[i]))
+  }
+  collect.push(strings[strings.length - 1])
+  return collect.join('')
+}
+
+function findSlots(node) {
+  const elements = []
+  const find = (node) => {
+    for (const child of node.childNodes) {
+      if (child.tagName === 'slot') {
+        elements.push(child)
+      }
+      if (!isCustomElement(child.tagName) &&
+        child.childNodes) {
+        find(child)
+      }
+    }
+  }
+  find(node)
+  return elements
+}
+
+function findInserts(node) {
+  const elements = []
+  const find = (node) => {
+    for (const child of node.childNodes) {
+      const attrs = child.attrs
+      if (attrs) {
+        for (let i=0; i < attrs.length; i++) {
+          if (attrs[i].name === 'slot') {
+            elements.push(child)
+          }
+        }
+      }
+      if (!isCustomElement(child.tagName) &&
+        child.childNodes) {
+        find(child)
+      }
+    }
+  }
+  find(node)
+  return elements
+}
+
+function fillSlots(node, template) {
+  const slots = findSlots(template)
+  const inserts = findInserts(node)
+
+  slots.forEach(slot => {
+    const slotAttrs = slot.attrs || []
+    let hasSlotName = false
+
+    slotAttrs.forEach(attr => {
+      if (attr.name === 'name') {
+        hasSlotName = true
+        const slotName = attr.value
+        inserts.forEach(insert => {
+          const insertAttrs = insert.attrs || []
+          insertAttrs.forEach(attr => {
+            if (attr.name === 'slot') {
+              const insertSlot = attr.value
+              if (insertSlot === slotName) {
+                const slotParentChildNodes = slot.parentNode.childNodes
+                slotParentChildNodes.splice(
+                  slotParentChildNodes
+                    .indexOf(slot),
+                  1,
+                  insert
+                )
+              }
+            }
+          })
+        })
+      }
+    })
+
+    if (!hasSlotName) {
+      const children = node.childNodes.filter(n => !inserts.includes(n))
+      const slotParentChildNodes = slot.parentNode.childNodes
+      slotParentChildNodes.splice(
+        slotParentChildNodes
+          .indexOf(slot),
+        1,
+        ...children
+      )
+    }
+  })
+}
+
+function processCustomElements(node, templates) {
+  const elements = []
+  const find = (node) => {
+    for (const child of node.childNodes) {
+      if (isCustomElement(child.tagName)) {
+        elements.push(child)
+        const template = expandTemplate(child, templates)
+        fillSlots(child, template)
+        const nodeChildNodes = child.childNodes
+        nodeChildNodes.splice(
+          0,
+          nodeChildNodes.length,
+          ...template.childNodes
+        )
+      }
+      if (child.childNodes) find(child)
+    }
+  }
+  find(node)
+  return elements
+}
+
+function expandTemplate(node, templates) {
+  return fragment(renderTemplate(node.tagName, templates, node.attrs))
+}
+
+function addScriptTags(body, scripts) {
+  body.childNodes.push(...scripts.childNodes)
+}
+
+function attrsToState(attrs, state={}) {
+  [...attrs].forEach(attr => state[attr.name] = decode(attr.value))
+  return state
+}
+
+function renderTemplate(tagName, templates, attrs) {
+  return require(`${templates}/${tagName}.js`)
+    .default(attrs && attrsToState(attrs), render)
+}
+
+function script(modulePath, customElement) {
+  return `
+<script src="/${modulePath}/${customElement}.js" type="module" crossorigin></script>
+  `
+}
+
+const state = {}
 let place = 0
 export function encode(value) {
   if (typeof value !== 'string') {
@@ -119,8 +180,3 @@ export function decode(value) {
     ? state[value]
     : value
 }
-
-Enhancer.encode = encode
-Enhancer.decode = decode
-
-export default Enhancer

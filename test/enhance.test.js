@@ -1,52 +1,21 @@
 import test from 'tape'
-import Enhancer from '..'
-const html = Enhancer({
-  templatePath: './test/fixtures/templates'
-})
-// Strip all whitespace for html string comparisons in tests
+import enhance from '..'
 const strip = str => str.replace(/\r?\n|\r|\s\s+/g, '')
-// JSDOM automatically wraps output with <html>...
-//  so we need this to mimic output in tests
+
 function doc(string) {
   return `<html><head></head><body>${string}</body></html>`
 }
 
-test('enhancer should exist', t=> {
-  t.ok(Enhancer)
-  t.end()
+const html = enhance({
+  templates: './test/fixtures/templates'
 })
 
-test('html function should exist', t=> {
+test('enhance should exist', t => {
   t.ok(html)
   t.end()
 })
 
-test('encode should exist', t=> {
-  t.ok(Enhancer.encode)
-  t.end()
-})
-
-test('should encode and decode string', t=> {
-  const index = Enhancer.encode('worky')
-  t.equals(Enhancer.decode(index), 'worky')
-  t.end()
-})
-
-test('should encode and decode array', t=> {
-  const a = [1,2,3]
-  const index = Enhancer.encode(a)
-  t.equals(Enhancer.decode(index), a)
-  t.end()
-})
-
-test('should encode array of objects', t=> {
-  const a = [{ title: 'one' },{ title: 'two' },{ title: 'three' }]
-  const index = Enhancer.encode(a)
-  t.equals(Enhancer.decode(index), a)
-  t.end()
-})
-
-test('should output template', t=> {
+test('should expand template', t=> {
   const actual = html`<my-paragraph></my-paragraph>`
   const expected = doc(`
 <my-paragraph>
@@ -62,71 +31,44 @@ test('should output template', t=> {
   t.end()
 })
 
-test('should update slot', t=> {
+test('should fill named slot', t=> {
   const actual = html`
-  <my-paragraph>
-    <span slot="my-text">Let's have some different text!</span>
-  </my-paragraph>`
-  const expected = doc(`
-  <my-paragraph>
-    <p>
-      <span slot="my-text">Let's have some different text!</span>
-    </p>
-  </my-paragraph>
-<script src="/modules/my-paragraph.js" type="module" crossorigin=""></script>
-`)
-  t.equal(
-    strip(actual),
-    strip(expected),
-    'updates slot from children correctly'
-  )
-  t.end()
-})
-
-test('should update nested slots', t=> {
-  const actual = html`
-  <my-paragraph>
-    <span slot="my-text">Let's have some different text!</span>
-    <my-paragraph>
-      <span slot="my-text">Some other text</span>
-    </my-paragraph>
-  </my-paragraph>`
-  const expected = doc(`
-  <my-paragraph>
-    <p>
-      <span slot="my-text">Let's have some different text!</span>
-    </p>
-    <my-paragraph>
-      <p>
-        <span slot="my-text">Some other text</span>
-      </p>
-    </my-paragraph>
-  </my-paragraph>
-<script src="/modules/my-paragraph.js" type="module" crossorigin=""></script>
-`)
-  t.equal(
-    strip(actual),
-    strip(expected),
-    'updates slot from children correctly'
-  )
-  t.end()
-})
-
-
-test('should treat number attribute as pass through', t=> {
-  const actual = html`
-<my-counter count=5></my-counter>
+<my-paragraph>
+  <span slot="my-text">Slotted</span>
+</my-paragraph>
   `
   const expected = doc(`
-<my-counter count="5">
-  <h3>Count: 5</h3>
-</my-counter>
-<script src="/modules/my-counter.js" type="module" crossorigin=""></script>
+<my-paragraph>
+  <p><span slot="my-text">Slotted</span></p>
+</my-paragraph>
+<script src="/modules/my-paragraph.js" type="module" crossorigin=""></script>
 `)
   t.equal(
     strip(actual),
     strip(expected),
-    'Treats numbers as pass through'
+    'Fills named slot'
+  )
+  t.end()
+})
+
+test('should add authored children to unnamed slot.', t=> {
+  const actual = html`
+  <my-content>
+    <h1>YOLO</h1>
+    <h4 slot=title>Custom title</h4>
+  </my-content>`
+  const expected = doc(`
+  <my-content>
+    <h2>My Content</h2>
+    <h4 slot="title">Custom title</h4>
+    <h1>YOLO</h1>
+  </my-content>
+<script src="/modules/my-content.js" type="module" crossorigin=""></script>
+`)
+  t.equal(
+    strip(actual),
+    strip(expected),
+    'Adds unslotted children to unnamed slot'
   )
   t.end()
 })
@@ -155,7 +97,7 @@ test('should pass attribute array values correctly', t => {
 <my-list items="${things}"></my-list>
 `
   const expected = doc(`
-<my-list items="__b_2">
+<my-list items="__b_0">
   <slot name="title">
     <h4>My list</h4>
   </slot>
@@ -175,77 +117,58 @@ test('should pass attribute array values correctly', t => {
   t.end()
 })
 
-test('should render nested custom elements', t=> {
-  const things = [{ title: 'one' },{ title: 'two' },{ title: 'three' }]
+
+test('should update deeply nested slots', t=> {
   const actual = html`
-<my-page items=${things}></my-page>
-  `
+  <my-content>
+    <my-content>
+      <h3 slot="title">Second</h3>
+      <my-content>
+        <h3 slot="title">Third</h3>
+      </my-content>
+    </my-content>
+  </my-content>`
   const expected = doc(`
-<my-page items="__b_3">
-  <h1>My Page</h1>
-  <my-content items="__b_4">
+  <my-content>
     <h2>My Content</h2>
-    <h3 slot="title">
-      YOLO
-    </h3>
-    <my-list items="__b_5">
-      <h4 slot="title">Content List</h4>
-      <ul>
-        <li>one</li>
-        <li>two</li>
-        <li>three</li>
-      </ul>
-    </my-list>
+    <slot name="title">
+      <h3>
+        Title
+      </h3>
+    </slot>
+    <my-content>
+      <h2>My Content</h2>
+      <h3 slot="title">Second</h3>
+      <my-content>
+        <h2>My Content</h2>
+        <h3 slot="title">Third</h3>
+      </my-content>
+    </my-content>
   </my-content>
-</my-page>
-<script src="/modules/my-page.js" type="module" crossorigin=""></script>
 <script src="/modules/my-content.js" type="module" crossorigin=""></script>
-<script src="/modules/my-list.js" type="module" crossorigin=""></script>
 `)
   t.equal(
     strip(actual),
     strip(expected),
-    'Renders nested custom elements by passing html function'
+    'Updates deeply nested slots'
   )
-  t.end()
-})
-
-test('should fill slots', t=> {
-  const things = [{ title: 'one' },{ title: 'two' },{ title: 'three' }]
-  const actual = html`
-<my-list items=${things}>
-  <h4 slot=title>Slotted title</h4>
-</my-list>
-  `
-  const expected = doc(`
-<my-list items="__b_6">
-  <h4 slot="title">Slotted title</h4>
-  <ul>
-    <li>one</li>
-    <li>two</li>
-    <li>three</li>
-  </ul>
-</my-list>
-<script src="/modules/my-list.js" type="module" crossorigin=""></script>
-`)
-  t.equal(strip(actual), strip(expected), 'fills slots correctly')
   t.end()
 })
 
 test('should fill nested rendered slots', t=> {
   const items = [{ title: 'one' },{ title: 'two' },{ title: 'three' }]
   const actual = html`
-<my-content items="${items}">
+<my-list-container items="${items}">
   <span slot=title>YOLO</span>
-</my-content>
+</my-list-container>
   `
   const expected = doc(`
-<my-content items="__b_7">
-  <h2>My Content</h2>
+<my-list-container items="__b_1">
+  <h2>My List Container</h2>
   <span slot="title">
     YOLO
   </span>
-  <my-list items="__b_8">
+  <my-list items="__b_2">
     <h4 slot="title">Content List</h4>
     <ul>
       <li>one</li>
@@ -253,8 +176,8 @@ test('should fill nested rendered slots', t=> {
       <li>three</li>
     </ul>
   </my-list>
-</my-content>
-<script src="/modules/my-content.js" type="module" crossorigin=""></script>
+</my-list-container>
+<script src="/modules/my-list-container.js" type="module" crossorigin=""></script>
 <script src="/modules/my-list.js" type="module" crossorigin=""></script>
 `)
   t.equal(
