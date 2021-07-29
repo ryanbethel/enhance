@@ -154,11 +154,11 @@ function attrsToState(attrs, state={}) {
 
 function renderTemplate(tagName, templates, attrs) {
   const templatePath = `${templates}/${tagName}.js`
-  if (existsSync(templatePath)) {
+  try {
     return require(templatePath)
       .default(attrs && attrsToState(attrs), render)
   }
-  else {
+  catch {
     console.warn(`🤷🏻‍♀️ Template file not found at: ${templatePath}`)
   }
 }

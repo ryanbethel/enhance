@@ -1,7 +1,7 @@
 {
   "name": "@begin/enhance",
   "version": "0.0.2",
-  "description": "",
+  "description": "Custom Element Server-side rendering CESR",
   "main": "index.js",
   "scripts": {
     "test": "tape -r esm ./test/*.test.js | tap-spec"
