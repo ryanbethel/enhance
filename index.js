@@ -1,3 +1,4 @@
+import { existsSync } from 'fs'
 import path from 'path'
 import { parse, parseFragment as fragment, serialize } from 'parse5'
 import isCustomElement from './lib/is-custom-element.js'
@@ -139,7 +140,7 @@ function processCustomElements(node, templates) {
 }
 
 function expandTemplate(node, templates) {
-  return fragment(renderTemplate(node.tagName, templates, node.attrs))
+  return fragment(renderTemplate(node.tagName, templates, node.attrs) || '')
 }
 
 function addScriptTags(body, scripts) {
@@ -152,8 +153,14 @@ function attrsToState(attrs, state={}) {
 }
 
 function renderTemplate(tagName, templates, attrs) {
-  return require(`${templates}/${tagName}.js`)
-    .default(attrs && attrsToState(attrs), render)
+  const templatePath = `${templates}/${tagName}.js`
+  if (existsSync(templatePath)) {
+    return require(templatePath)
+      .default(attrs && attrsToState(attrs), render)
+  }
+  else {
+    console.warn(`🤷🏻‍♀️ Template file not found at: ${templatePath}`)
+  }
 }
 
 function script(modulePath, customElement) {

@@ -187,3 +187,11 @@ test('should fill nested rendered slots', t=> {
   )
   t.end()
 })
+
+test('should not throw when template not found', t => {
+  t.ok(
+    html`<missing-template></missing-template>`,
+    'Warns instead of throwing.'
+  )
+  t.end()
+})
