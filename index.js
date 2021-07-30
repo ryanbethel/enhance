@@ -1,4 +1,3 @@
-import { existsSync } from 'fs'
 import path from 'path'
 import { parse, parseFragment as fragment, serialize } from 'parse5'
 import isCustomElement from './lib/is-custom-element.js'
@@ -11,17 +10,15 @@ export default function Enhancer(options={}) {
     modules=MODULES
   } = options
 
-  function html(strings, ...values) {
+  return function html(strings, ...values) {
     const doc = parse(render(strings, ...values))
     const body = doc.childNodes[0].childNodes[1]
-    const customElements = processCustomElements(doc, templates)
+    const customElements = processCustomElements(body, templates)
     const moduleNames = [...new Set(customElements.map(node =>  node.tagName))]
     const scripts = fragment(moduleNames.map(name => script(modules, name)).join(''))
     addScriptTags(body, scripts)
     return serialize(doc)
   }
-
-  return html
 }
 
 function render(strings, ...values) {
@@ -76,33 +73,38 @@ function fillSlots(node, template) {
   const slots = findSlots(template)
   const inserts = findInserts(node)
 
-  slots.forEach(slot => {
+  for (let i=0; i < slots.length; i++) {
+    const slot = slots[i]
     const slotAttrs = slot.attrs || []
     let hasSlotName = false
 
-    slotAttrs.forEach(attr => {
+    for (let i=0; i < slotAttrs.length; i++) {
+      const attr = slotAttrs[i]
       if (attr.name === 'name') {
         hasSlotName = true
         const slotName = attr.value
-        inserts.forEach(insert => {
+
+        for (let i=0; i < inserts.length; i ++) {
+          const insert = inserts[i]
           const insertAttrs = insert.attrs || []
-          insertAttrs.forEach(attr => {
-            if (attr.name === 'slot') {
-              const insertSlot = attr.value
-              if (insertSlot === slotName) {
-                const slotParentChildNodes = slot.parentNode.childNodes
-                slotParentChildNodes.splice(
-                  slotParentChildNodes
-                    .indexOf(slot),
-                  1,
-                  insert
-                )
-              }
+
+          for (let i=0; i < insertAttrs.length; i++) {
+            const attr = insertAttrs[i]
+            const insertSlot = attr.value
+
+            if (insertSlot === slotName) {
+              const slotParentChildNodes = slot.parentNode.childNodes
+              slotParentChildNodes.splice(
+                slotParentChildNodes
+                  .indexOf(slot),
+                1,
+                insert
+              )
             }
-          })
-        })
+          }
+        }
       }
-    })
+    }
 
     if (!hasSlotName) {
       const children = node.childNodes.filter(n => !inserts.includes(n))
@@ -114,7 +116,7 @@ function fillSlots(node, template) {
         ...children
       )
     }
-  })
+  }
 }
 
 function processCustomElements(node, templates) {
