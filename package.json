@@ -14,7 +14,7 @@
     "tape": "^5.2.2"
   },
   "dependencies": {
-    "parse5": "^6.0.1",
+    "@begin/parse5": "^0.0.2",
     "esm": "^3.2.25"
   }
 }

@@ -11,7 +11,9 @@ export default function Enhancer(options={}) {
   } = options
 
   return function html(strings, ...values) {
+    console.time('parsedoc')
     const doc = parse(render(strings, ...values))
+    console.timeEnd('parsedoc')
     const body = doc.childNodes[0].childNodes[1]
     const customElements = processCustomElements(body, templates)
     const moduleNames = [...new Set(customElements.map(node =>  node.tagName))]
@@ -44,6 +46,7 @@ export function encode(value) {
 }
 
 function processCustomElements(node, templates) {
+  console.time('processCustomElements')
   const elements = []
   const find = (node) => {
     for (const child of node.childNodes) {
@@ -62,6 +65,7 @@ function processCustomElements(node, templates) {
     }
   }
   find(node)
+  console.timeEnd('processCustomElements')
   return elements
 }
 
@@ -92,6 +96,7 @@ export function decode(value) {
 }
 
 function fillSlots(node, template) {
+  console.time('fillSlots')
   const slots = findSlots(template)
   const inserts = findInserts(node)
 
@@ -143,9 +148,12 @@ function fillSlots(node, template) {
       )
     }
   }
+  console.timeEnd('fillSlots')
 }
 
+
 function findSlots(node) {
+  console.time('findSlots')
   const elements = []
   const find = (node) => {
     for (const child of node.childNodes) {
@@ -159,10 +167,12 @@ function findSlots(node) {
     }
   }
   find(node)
+  console.timeEnd('findSlots')
   return elements
 }
 
 function findInserts(node) {
+  console.time('findInserts')
   const elements = []
   const find = (node) => {
     for (const child of node.childNodes) {
@@ -181,6 +191,7 @@ function findInserts(node) {
     }
   }
   find(node)
+  console.timeEnd('findInserts')
   return elements
 }
 
