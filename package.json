@@ -1,6 +1,6 @@
 {
   "name": "@begin/enhance",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Custom Element Server-side rendering CESR",
   "main": "index.js",
   "scripts": {
