@@ -86,8 +86,8 @@ function renderTemplate(tagName, templates, attrs) {
     return require(templatePath)
       .default(attrs && attrsToState(attrs), render)
   }
-  catch {
-    console.warn(`🤷🏻‍♀️ Template file not found at: ${templatePath}`)
+  catch(err) {
+    console.error(err.message)
   }
 }
 
