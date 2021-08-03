@@ -103,13 +103,35 @@ test('pass attributes as state', t=> {
   t.end()
 })
 
+test('support spread of object attributes', t=> {
+  const o = {
+    href: '/yolo',
+    text: 'sketchy',
+    customAttribute: true
+  }
+  const actual = html`
+<my-link ...${o}></my-link>
+`
+  const expected = doc(`
+<my-link href="/yolo" text="sketchy" custom-attribute="custom-attribute">
+  <a href="/yolo">sketchy</a>
+</my-link>
+<script src="/modules/my-link.js" type="module" crossorigin=""></script>
+`)
+  t.equal(
+    strip(actual),
+    strip(expected),
+    'supports spread operator for expanding entire object as attributes'
+  )
+  t.end()
+})
 test('pass attribute array values correctly', t => {
   const things = [{ title: 'one' },{ title: 'two' },{ title: 'three' }]
   const actual = html`
 <my-list items="${things}"></my-list>
 `
   const expected = doc(`
-<my-list items="__b_0">
+<my-list items="__b_1">
   <slot name="title">
     <h4>My list</h4>
   </slot>
@@ -175,12 +197,12 @@ test('fill nested rendered slots', t=> {
 </my-list-container>
   `
   const expected = doc(`
-<my-list-container items="__b_1">
+<my-list-container items="__b_2">
   <h2>My List Container</h2>
   <span slot="title">
     YOLO
   </span>
-  <my-list items="__b_2">
+  <my-list items="__b_3">
     <h4 slot="title">Content List</h4>
     <ul>
       <li>one</li>

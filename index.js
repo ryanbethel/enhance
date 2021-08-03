@@ -27,7 +27,18 @@ function render(strings, ...values) {
     collect.push(strings[i], encode(values[i]))
   }
   collect.push(strings[strings.length - 1])
+
   return collect.join('')
+    .replace(/\.\.\.\s?(__\w+)/, (_, v) => {
+      const o = state[v]
+      return Object.entries(o)
+        .map(([key, value]) => {
+          const k = key.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
+          if (value === true) return `${k}="${k}" `
+          else if (value) return `${k}="${encode(value)}" `
+          else return ''
+        }).filter(Boolean).join('')
+    })
 }
 
 const state = {}
