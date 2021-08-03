@@ -87,7 +87,7 @@ function renderTemplate(tagName, templates, attrs) {
       .default(attrs && attrsToState(attrs), render)
   }
   catch(err) {
-    console.error(err.message)
+    console.error(err)
   }
 }
 
