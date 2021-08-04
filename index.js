@@ -15,9 +15,11 @@ export default function Enhancer(options={}) {
     const body = doc.childNodes[0].childNodes[1]
     const customElements = processCustomElements(body, templates)
     const moduleNames = [...new Set(customElements.map(node =>  node.tagName))]
-    const scripts = fragment(moduleNames.map(name => script(modules, name)).join(''))
-    addScriptTags(body, scripts)
-    return serialize(doc)
+    const scriptTags = fragment(moduleNames.map(name => script(name, modules)).join(''))
+    const templateTags = fragment(moduleNames.map(name => template(name, templates)).join(''))
+    addTemplateTags(body, templateTags)
+    addScriptTags(body, scriptTags)
+    return serialize(doc).replace(/__b_\d+/g, '')
   }
 }
 
@@ -29,7 +31,7 @@ function render(strings, ...values) {
   collect.push(strings[strings.length - 1])
 
   return collect.join('')
-    .replace(/\.\.\.\s?(__\w+)/, (_, v) => {
+    .replace(/\.\.\.\s?(__b_\d+)/, (_, v) => {
       const o = state[v]
       return Object.entries(o)
         .map(([key, value]) => {
@@ -195,10 +197,22 @@ function findInserts(node) {
   return elements
 }
 
-function script(modulePath, customElement) {
+function template(name, path) {
   return `
-<script src="/${modulePath}/${customElement}.js" type="module" crossorigin></script>
+<template id="${name}-template">
+  ${renderTemplate(name, path)}
+</template>
   `
+}
+
+function script(name, path) {
+  return `
+<script src="/${path}/${name}.js" type="module" crossorigin></script>
+  `
+}
+
+function addTemplateTags(body, templates) {
+  body.childNodes.unshift(...templates.childNodes)
 }
 
 function addScriptTags(body, scripts) {

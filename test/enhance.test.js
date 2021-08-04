@@ -30,6 +30,13 @@ test('return an html function', t => {
 test('expand template', t=> {
   const actual = html`<my-paragraph></my-paragraph>`
   const expected = doc(`
+<template id="my-paragraph-template">
+  <p>
+    <slot name="my-text">
+      My default text
+    </slot>
+  </p>
+</template>
 <my-paragraph>
   <p><slot name="my-text">My default text</slot></p>
 </my-paragraph>
@@ -50,6 +57,13 @@ test('fill named slot', t=> {
 </my-paragraph>
   `
   const expected = doc(`
+<template id="my-paragraph-template">
+  <p>
+    <slot name="my-text">
+      My default text
+    </slot>
+  </p>
+</template>
 <my-paragraph>
   <p><span slot="my-text">Slotted</span></p>
 </my-paragraph>
@@ -70,6 +84,15 @@ test('add authored children to unnamed slot', t=> {
     <h4 slot=title>Custom title</h4>
   </my-content>`
   const expected = doc(`
+<template id="my-content-template">
+  <h2>My Content</h2>
+  <slot name="title">
+    <h3>
+      Title
+    </h3>
+  </slot>
+  <slot></slot>
+</template>
   <my-content>
     <h2>My Content</h2>
     <h4 slot="title">Custom title</h4>
@@ -90,6 +113,9 @@ test('pass attributes as state', t=> {
 <my-link href='/yolo' text='sketchy'></my-link>
 `
   const expected = doc(`
+<template id="my-link-template">
+  <a href=""></a>
+</template>
 <my-link href="/yolo" text="sketchy">
   <a href="/yolo">sketchy</a>
 </my-link>
@@ -113,6 +139,9 @@ test('support spread of object attributes', t=> {
 <my-link ...${o}></my-link>
 `
   const expected = doc(`
+<template id="my-link-template">
+  <a href=""></a>
+</template>
 <my-link href="/yolo" text="sketchy" custom-attribute="custom-attribute">
   <a href="/yolo">sketchy</a>
 </my-link>
@@ -131,7 +160,14 @@ test('pass attribute array values correctly', t => {
 <my-list items="${things}"></my-list>
 `
   const expected = doc(`
-<my-list items="__b_1">
+<template id="my-list-template">
+  <slot name="title">
+    <h4>My list</h4>
+  </slot>
+  <ul>
+  </ul>
+</template>
+<my-list items="">
   <slot name="title">
     <h4>My list</h4>
   </slot>
@@ -163,6 +199,15 @@ test('update deeply nested slots', t=> {
     </my-content>
   </my-content>`
   const expected = doc(`
+<template id="my-content-template">
+  <h2>My Content</h2>
+  <slot name="title">
+    <h3>
+      Title
+    </h3>
+  </slot>
+  <slot></slot>
+</template>
   <my-content>
     <h2>My Content</h2>
     <slot name="title">
@@ -197,12 +242,30 @@ test('fill nested rendered slots', t=> {
 </my-list-container>
   `
   const expected = doc(`
-<my-list-container items="__b_2">
+<template id="my-list-container-template">
+  <h2>My List Container</h2>
+  <slot name="title">
+    <h3>
+      Title
+    </h3>
+  </slot>
+  <my-list items="">
+    <h4 slot="title">Content List</h4>
+  </my-list>
+</template>
+<template id="my-list-template">
+  <slot name="title">
+    <h4>My list</h4>
+  </slot>
+  <ul>
+  </ul>
+</template>
+<my-list-container items="">
   <h2>My List Container</h2>
   <span slot="title">
     YOLO
   </span>
-  <my-list items="__b_3">
+  <my-list items="">
     <h4 slot="title">Content List</h4>
     <ul>
       <li>one</li>
