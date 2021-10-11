@@ -4,8 +4,7 @@
   "description": "Server-side rendering for custom elements with template and slots support",
   "main": "index.js",
   "scripts": {
-    "test": "tape -r esm ./test/enhance.test.js | tap-spec",
-    "lint": "eslint . --fix"
+    "test": "tape -r esm ./test/enhance.test.js | tap-spec"
   },
   "keywords": [],
   "author": "kj <kj@begin.com>",
@@ -17,10 +16,5 @@
   },
   "dependencies": {
     "@begin/parse5": "^0.0.2"
-  },
-  "eslintConfig": {
-    "parserOptions": {
-      "sourceType": "module"
-    }
   }
 }
