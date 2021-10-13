@@ -1,10 +1,10 @@
-import path from 'path'
-import { parse, fragment, serialize } from '@begin/parse5'
-import isCustomElement from './lib/is-custom-element.js'
+const path = require('path')
+const { parse, fragment, serialize } = require('@begin/parse5')
+const isCustomElement = require('./lib/is-custom-element')
 const TEMPLATES = path.join('..', 'views', 'templates')
 const MODULES = path.join('modules')
 
-export default function Enhancer(options={}) {
+module.exports = function Enhancer(options={}) {
   const {
     templates=TEMPLATES,
     modules=MODULES
@@ -45,7 +45,7 @@ function render(strings, ...values) {
 
 const state = {}
 let place = 0
-export function encode(value) {
+function encode(value) {
   if (typeof value !== 'string') {
     const id = `__b_${place++}`
     state[id] = value
@@ -85,8 +85,7 @@ function expandTemplate(node, templates) {
 function renderTemplate(tagName, templates, attrs) {
   const templatePath = `${templates}/${tagName}.js`
   try {
-    return require(templatePath)
-      .default(attrs && attrsToState(attrs), render)
+    return require(templatePath)(attrs && attrsToState(attrs), render)
   }
   catch(err) {
     console.error(err)
@@ -98,7 +97,7 @@ function attrsToState(attrs, state={}) {
   return state
 }
 
-export function decode(value) {
+function decode(value) {
   return value.startsWith('__b_')
     ? state[value]
     : value

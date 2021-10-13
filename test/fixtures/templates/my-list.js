@@ -1,4 +1,4 @@
-export default function MyList(state={}) {
+module.exports = function MyList(state={}) {
   const items = state.items || []
   const listItems = items &&
     items.map &&

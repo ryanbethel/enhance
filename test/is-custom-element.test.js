@@ -1,5 +1,5 @@
-import  test from 'tape'
-import isCustomElement from '../lib/is-custom-element.js'
+const test = require('tape')
+const isCustomElement = require('../lib/is-custom-element.js')
 
 test('isCustomElement', t=> {
   t.ok(isCustomElement, 'exists')

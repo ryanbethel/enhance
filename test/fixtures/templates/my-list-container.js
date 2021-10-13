@@ -1,4 +1,4 @@
-export default function MyListContainer(state={}, html) {
+module.exports = function MyListContainer(state={}, html) {
   const { items } = state
   return html`
 <h2>My List Container</h2>

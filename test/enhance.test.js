@@ -1,5 +1,5 @@
-import test from 'tape'
-import enhance from '..'
+const test = require('tape')
+const enhance = require('..')
 // Timed version
 //import enhance from '../timed.js'
 const strip = str => str.replace(/\r?\n|\r|\s\s+/g, '')
@@ -292,4 +292,3 @@ test('not throw when template not found', t => {
   )
   t.end()
 })
-
