@@ -1,4 +1,4 @@
-export default function MyPage(state={}, html) {
+module.exports = function MyPage(state={}, html) {
   const { items=[] } = state
   return html`
 <h1>My Page</h1>
