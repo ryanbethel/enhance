@@ -207,7 +207,7 @@ function template(name, path) {
 }
 
 function script(name, path) {
-  const rawPath = `/${path}/${name}.js`
+  const rawPath = `${path}/${name}.js`
   const scriptPath = ARC
     ? fingerprintedFilePath(rawPath)
     : rawPath
