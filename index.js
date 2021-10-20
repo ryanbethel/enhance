@@ -1,3 +1,5 @@
+const ARC = process.env.ARC_ENV
+const fingerprintedFilePath = require('./lib/fingerprinted-file-path')
 const path = require('path')
 const { parse, fragment, serialize } = require('@begin/parse5')
 const isCustomElement = require('./lib/is-custom-element')
@@ -36,7 +38,7 @@ function render(strings, ...values) {
       return Object.entries(o)
         .map(([key, value]) => {
           const k = key.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
-          if (value === true) return `${k}="${k}" `
+          if (value === true) return `${k}="${k}"`
           else if (value) return `${k}="${encode(value)}" `
           else return ''
         }).filter(Boolean).join('')
@@ -205,8 +207,12 @@ function template(name, path) {
 }
 
 function script(name, path) {
+  const rawPath = `/${path}/${name}.js`
+  const scriptPath = ARC
+    ? fingerprintedFilePath(rawPath)
+    : rawPath
   return `
-<script src="/${path}/${name}.js" type="module" crossorigin></script>
+<script src="${scriptPath}" type="module" crossorigin></script>
   `
 }
 

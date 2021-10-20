@@ -13,6 +13,7 @@
     "tape": "^5.2.2"
   },
   "dependencies": {
+    "@architect/functions": "^4.0.0",
     "@begin/parse5": "^0.0.2"
   }
 }
