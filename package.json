@@ -3,17 +3,17 @@
   "version": "1.1.1",
   "description": "Server-side rendering for custom elements with template and slots support",
   "scripts": {
-    "test": "tape ./test/enhance.test.js | tap-diff"
+    "test": "tape ./test/enhance.test.js | tap-min"
   },
   "keywords": [],
   "author": "kj <kj@begin.com>",
   "license": "Apache-2.0",
   "devDependencies": {
-    "tap-diff": "^0.1.1",
     "tape": "^5.2.2"
   },
   "dependencies": {
     "@architect/functions": "^4.0.0",
-    "@begin/parse5": "^0.0.2"
+    "@begin/parse5": "^0.0.2",
+    "tap-min": "^2.0.0"
   }
 }

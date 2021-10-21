@@ -9,7 +9,8 @@ function doc(string) {
 }
 
 const html = enhance({
-  templates: './test/fixtures/templates'
+  templates: './test/fixtures/templates',
+  modules: 'modules'
 })
 
 test('Enhance should', t => {
