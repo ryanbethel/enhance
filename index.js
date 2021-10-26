@@ -1,10 +1,7 @@
-const ARC = process.env.ARC_ENV
-const fingerprintedFilePath = require('./lib/fingerprinted-file-path')
-const path = require('path')
 const { parse, fragment, serialize } = require('@begin/parse5')
 const isCustomElement = require('./lib/is-custom-element')
 const TEMPLATES = '@architect/views/templates'
-const MODULES = 'components'
+const MODULES = '/components'
 
 module.exports = function Enhancer(options={}) {
   const {
@@ -207,10 +204,7 @@ function template(name, path) {
 }
 
 function script(name, path) {
-  const rawPath = `/${path}/${name}.js`
-  const scriptPath = ARC
-    ? fingerprintedFilePath(rawPath)
-    : rawPath
+  const scriptPath = `${path}/${name}.js`
   return `
 <script src="${scriptPath}" type="module" crossorigin></script>
   `
