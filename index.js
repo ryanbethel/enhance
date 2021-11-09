@@ -1,12 +1,10 @@
 const { parse, fragment, serialize } = require('@begin/parse5')
 const isCustomElement = require('./lib/is-custom-element')
 const TEMPLATES = '@architect/views/templates'
-const MODULES = '/components'
 
 module.exports = function Enhancer(options={}) {
   const {
-    templates=TEMPLATES,
-    modules=MODULES
+    templates=TEMPLATES
   } = options
 
   return function html(strings, ...values) {
@@ -14,10 +12,8 @@ module.exports = function Enhancer(options={}) {
     const body = doc.childNodes[0].childNodes[1]
     const customElements = processCustomElements(body, templates)
     const moduleNames = [...new Set(customElements.map(node =>  node.tagName))]
-    const scriptTags = fragment(moduleNames.map(name => script(name, modules)).join(''))
     const templateTags = fragment(moduleNames.map(name => template(name, templates)).join(''))
     addTemplateTags(body, templateTags)
-    addScriptTags(body, scriptTags)
     return serialize(doc).replace(/__b_\d+/g, '')
   }
 }
@@ -78,7 +74,13 @@ function processCustomElements(node, templates) {
 }
 
 function expandTemplate(node, templates) {
-  return fragment(renderTemplate(node.tagName, templates, node.attrs) || '')
+  const frag = fragment(renderTemplate(node.tagName, templates, node.attrs) || '')
+  for (const node of frag.childNodes) {
+    if (node.nodeName === 'script') {
+      frag.childNodes.splice(frag.childNodes.indexOf(node), 1)
+    }
+  }
+  return frag
 }
 
 function renderTemplate(tagName, templates, attrs) {
@@ -203,17 +205,6 @@ function template(name, path) {
   `
 }
 
-function script(name, path) {
-  const scriptPath = `${path}/${name}.js`
-  return `
-<script src="${scriptPath}" type="module" crossorigin></script>
-  `
-}
-
 function addTemplateTags(body, templates) {
   body.childNodes.unshift(...templates.childNodes)
-}
-
-function addScriptTags(body, scripts) {
-  body.childNodes.push(...scripts.childNodes)
 }

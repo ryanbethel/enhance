@@ -9,8 +9,7 @@ function doc(string) {
 }
 
 const html = enhance({
-  templates: './test/fixtures/templates',
-  modules: '/modules'
+  templates: './test/fixtures/templates'
 })
 
 test('Enhance should', t => {
@@ -37,11 +36,22 @@ test('expand template', t=> {
       My default text
     </slot>
   </p>
+  <script type="module">
+    class MyParagraph extends HTMLElement {
+      constructor() {
+        super()
+      }
+
+      connectedCallback() {
+        console.log('My Paragraph')
+      }
+    }
+  </script>
 </template>
+
 <my-paragraph>
   <p><slot name="my-text">My default text</slot></p>
 </my-paragraph>
-<script src="/modules/my-paragraph.js" type="module" crossorigin=""></script>
 `)
   t.equal(
     strip(actual),
@@ -64,11 +74,21 @@ test('fill named slot', t=> {
       My default text
     </slot>
   </p>
+  <script type="module">
+    class MyParagraph extends HTMLElement {
+      constructor() {
+        super()
+      }
+
+      connectedCallback() {
+        console.log('My Paragraph')
+      }
+    }
+  </script>
 </template>
 <my-paragraph>
   <p><span slot="my-text">Slotted</span></p>
 </my-paragraph>
-<script src="/modules/my-paragraph.js" type="module" crossorigin=""></script>
 `)
   t.equal(
     strip(actual),
@@ -93,13 +113,23 @@ test('add authored children to unnamed slot', t=> {
     </h3>
   </slot>
   <slot></slot>
+  <script type="module">
+    class MyContent extends HTMLElement {
+      constructor() {
+        super()
+      }
+
+      connectedCallback() {
+        console.log('My Content')
+      }
+    }
+  </script>
 </template>
-  <my-content>
-    <h2>My Content</h2>
-    <h4 slot="title">Custom title</h4>
-    <h1>YOLO</h1>
-  </my-content>
-<script src="/modules/my-content.js" type="module" crossorigin=""></script>
+<my-content>
+  <h2>My Content</h2>
+  <h4 slot="title">Custom title</h4>
+  <h1>YOLO</h1>
+</my-content>
 `)
   t.equal(
     strip(actual),
@@ -116,11 +146,21 @@ test('pass attributes as state', t=> {
   const expected = doc(`
 <template id="my-link-template">
   <a href=""></a>
+  <script type="module">
+    class MyLink extends HTMLElement {
+      constructor() {
+        super()
+      }
+
+      connectedCallback() {
+        console.log('My Link')
+      }
+    }
+  </script>
 </template>
 <my-link href="/yolo" text="sketchy">
   <a href="/yolo">sketchy</a>
 </my-link>
-<script src="/modules/my-link.js" type="module" crossorigin=""></script>
 `)
   t.equal(
     strip(actual),
@@ -142,11 +182,21 @@ test('support spread of object attributes', t=> {
   const expected = doc(`
 <template id="my-link-template">
   <a href=""></a>
+  <script type="module">
+    class MyLink extends HTMLElement {
+      constructor() {
+        super()
+      }
+
+      connectedCallback() {
+        console.log('My Link')
+      }
+    }
+  </script>
 </template>
 <my-link href="/yolo" text="sketchy" custom-attribute="custom-attribute">
   <a href="/yolo">sketchy</a>
 </my-link>
-<script src="/modules/my-link.js" type="module" crossorigin=""></script>
 `)
   t.equal(
     strip(actual),
@@ -155,6 +205,7 @@ test('support spread of object attributes', t=> {
   )
   t.end()
 })
+
 test('pass attribute array values correctly', t => {
   const things = [{ title: 'one' },{ title: 'two' },{ title: 'three' }]
   const actual = html`
@@ -167,6 +218,17 @@ test('pass attribute array values correctly', t => {
   </slot>
   <ul>
   </ul>
+  <script type="module">
+    class MyList extends HTMLElement {
+      constructor() {
+        super()
+      }
+
+      connectedCallback() {
+        console.log('My List')
+      }
+    }
+  </script>
 </template>
 <my-list items="">
   <slot name="title">
@@ -178,7 +240,6 @@ test('pass attribute array values correctly', t => {
     <li>three</li>
   </ul>
 </my-list>
-<script src="/modules/my-list.js" type="module" crossorigin=""></script>
   `)
   t.equal(
     strip(actual),
@@ -208,6 +269,17 @@ test('update deeply nested slots', t=> {
     </h3>
   </slot>
   <slot></slot>
+  <script type="module">
+    class MyContent extends HTMLElement {
+      constructor() {
+        super()
+      }
+
+      connectedCallback() {
+        console.log('My Content')
+      }
+    }
+  </script>
 </template>
   <my-content>
     <h2>My Content</h2>
@@ -225,7 +297,6 @@ test('update deeply nested slots', t=> {
       </my-content>
     </my-content>
   </my-content>
-<script src="/modules/my-content.js" type="module" crossorigin=""></script>
 `)
   t.equal(
     strip(actual),
@@ -253,6 +324,17 @@ test('fill nested rendered slots', t=> {
   <my-list items="">
     <h4 slot="title">Content List</h4>
   </my-list>
+  <script type="module">
+    class MyListContainer extends HTMLElement {
+      constructor() {
+        super()
+      }
+
+      connectedCallback() {
+        console.log('My List Container')
+      }
+    }
+  </script>
 </template>
 <template id="my-list-template">
   <slot name="title">
@@ -260,6 +342,17 @@ test('fill nested rendered slots', t=> {
   </slot>
   <ul>
   </ul>
+  <script type="module">
+    class MyList extends HTMLElement {
+      constructor() {
+        super()
+      }
+
+      connectedCallback() {
+        console.log('My List')
+      }
+    }
+  </script>
 </template>
 <my-list-container items="">
   <h2>My List Container</h2>
@@ -275,8 +368,6 @@ test('fill nested rendered slots', t=> {
     </ul>
   </my-list>
 </my-list-container>
-<script src="/modules/my-list-container.js" type="module" crossorigin=""></script>
-<script src="/modules/my-list.js" type="module" crossorigin=""></script>
 `)
   t.equal(
     strip(actual),
