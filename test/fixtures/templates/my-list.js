@@ -11,5 +11,16 @@ module.exports = function MyList(state={}) {
 <ul>
   ${listItems}
 </ul>
+<script type="module">
+  class MyList extends HTMLElement {
+    constructor() {
+      super()
+    }
+
+    connectedCallback() {
+      console.log('My List')
+    }
+  }
+</script>
 `
 }

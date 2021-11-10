@@ -10,5 +10,16 @@ module.exports = function MyListContainer(state={}, html) {
 <my-list items=${items}>
   <h4 slot="title">Content List</h4>
 </my-list>
+<script type="module">
+  class MyListContainer extends HTMLElement {
+    constructor() {
+      super()
+    }
+
+    connectedCallback() {
+      console.log('My List Container')
+    }
+  }
+</script>
   `
 }

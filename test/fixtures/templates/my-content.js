@@ -7,5 +7,16 @@ module.exports = function MyContent(state={}, html) {
   </h3>
 </slot>
 <slot></slot>
+<script type="module">
+  class MyContent extends HTMLElement {
+    constructor() {
+      super()
+    }
+
+    connectedCallback() {
+      console.log('My Content')
+    }
+  }
+</script>
   `
 }
