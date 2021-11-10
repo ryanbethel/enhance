@@ -89,7 +89,7 @@ function renderTemplate(tagName, templates, attrs) {
     return require(templatePath)(attrs && attrsToState(attrs), render)
   }
   catch(err) {
-    console.error(err)
+    console.warn(`Template not found for ${templatePath}`)
   }
 }
 
