@@ -1,6 +1,6 @@
 {
   "name": "@begin/enhance",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "Server-side rendering for custom elements with template and slots support",
   "scripts": {
     "test": "tape ./test/enhance.test.js | tap-spek"
