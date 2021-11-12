@@ -12,14 +12,18 @@ Enhance works really well with [Architect](arc.codes).
 `npm i @begin/enhance`
 
 ## Usage
+Author your HTML with custom elements
+```javascript
+const html = require('@begin/enhance')()
+console.log(html`<hello-world greeting="Well hi!"></hello-world>`
+```
 
 By default enhance looks for templates in your projects `/src/views/templates` directory and loads components from your projects `/public/components` directory.
-
 
 An example template used for Server Side Rendering
 ```javascript
 // Template
-module.exports = function MyCounter(state={}, html) {
+module.exports = function HelloWorldTemplate(state={}, html) {
   const { greeting='Hello World' } = state
 
   return html`
@@ -89,3 +93,6 @@ Extracting the inert script tag from the template and inserting it into the page
   document.body.appendChild(sf.content.lastElementChild)
 </script>
 ```
+
+This could also be used to as a static site generator locally.
+Just console log the output and pipe it to an html page.
