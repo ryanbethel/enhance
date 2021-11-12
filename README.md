@@ -18,7 +18,11 @@ const html = require('@begin/enhance')()
 console.log(html`<hello-world greeting="Well hi!"></hello-world>`
 ```
 
-By default enhance looks for templates in your projects `/src/views/templates` directory.
+By default enhance looks for templates in your projects `/src/views/templates` directory but you can configure where it should look by passing an options object.
+```javascript
+const html = require('@begin/enhance')({ templates: '/components' })
+console.log(html`<hello-world greeting="Well hi!"></hello-world>`
+```
 
 An example template used for Server Side Rendering
 ```javascript
