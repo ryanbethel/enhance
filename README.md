@@ -93,8 +93,10 @@ The template added to the server rendered HTML page
 Extracting the inert script tag from the template and inserting it into the page will activate the Web Component.
 ```javascript
 <script>
-  const sf = document.getElementById('single-file')
-  document.body.appendChild(sf.content.lastElementChild)
+Array.from(document.getElementsByTagName("template"))
+  .forEach(t => 'SCRIPT' === t.content.lastElementChild.nodeName
+    ? document.body.appendChild(t.content.lastElementChild)
+    :'')
 </script>
 ```
 
