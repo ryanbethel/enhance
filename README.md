@@ -15,7 +15,7 @@ Enhance works really well with [Architect](arc.codes).
 Author your HTML with custom elements
 ```javascript
 const html = require('@begin/enhance')()
-console.log(html`<hello-world greeting="Well hi!"></hello-world>`
+console.log(html`<hello-world greeting="Well hi!"></hello-world>`)
 ```
 
 By default enhance looks for templates in your projects `/src/views/templates` directory but you can configure where it should look by passing an options object.
