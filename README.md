@@ -90,15 +90,5 @@ The template added to the server rendered HTML page
 </template>
 ```
 
-Extracting the inert script tag from the template and inserting it into the page will activate the Web Component.
-```javascript
-<script>
-Array.from(document.getElementsByTagName("template"))
-  .forEach(t => 'SCRIPT' === t.content.lastElementChild.nodeName
-    ? document.body.appendChild(t.content.lastElementChild)
-    :'')
-</script>
-```
-
 This could also be used to as a static site generator locally.
 Just console log the output and pipe it to an html page.
