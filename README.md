@@ -75,7 +75,7 @@ The template added to the server rendered HTML page
     class HelloWorld extends HTMLElement {
       constructor () {
         super()
-        const template = document.getElementById('single-file')
+        const template = document.getElementById('hello-world-template')
         this.attachShadow({ mode: 'open' })
           .appendChild(template.content.cloneNode(true))
       }
