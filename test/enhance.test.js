@@ -5,7 +5,7 @@ const enhance = require('..')
 const strip = str => str.replace(/\r?\n|\r|\s\s+/g, '')
 
 function doc(string) {
-  return `<html><head></head><body>${string}</body></html>`
+  return `<html><head></head><body>${string}<script>Array.from(document.getElementsByTagName("template")).forEach(t => 'SCRIPT' === t.content.lastElementChild.nodeName?document.body.appendChild(t.content.lastElementChild):'')</script></body></html>`
 }
 
 const html = enhance({
@@ -373,14 +373,6 @@ test('fill nested rendered slots', t=> {
     strip(actual),
     strip(expected),
     'Wow it renders nested custom elements by passing that handy render function when executing template functions'
-  )
-  t.end()
-})
-
-test('not throw when template not found', t => {
-  t.ok(
-    html`<missing-template></missing-template>`,
-    'well that\'s nice, it warns instead of throwing.'
   )
   t.end()
 })
