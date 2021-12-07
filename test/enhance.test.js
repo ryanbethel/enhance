@@ -61,6 +61,43 @@ test('expand template', t=> {
   t.end()
 })
 
+test('expand template in fragment mode', t=> {
+const htmlFragment = enhance({
+  templates: './test/fixtures/templates',
+  fragmentExport:true
+})
+  const actual = htmlFragment`<my-paragraph></my-paragraph>`
+  const expected = `
+<template id="my-paragraph-template">
+  <p>
+    <slot name="my-text">
+      My default text
+    </slot>
+  </p>
+  <script type="module">
+    class MyParagraph extends HTMLElement {
+      constructor() {
+        super()
+      }
+
+      connectedCallback() {
+        console.log('My Paragraph')
+      }
+    }
+  </script>
+</template>
+
+<my-paragraph>
+  <p><slot name="my-text">My default text</slot></p>
+</my-paragraph>
+`
+  t.equal(
+    strip(actual),
+    strip(expected),
+    'It expands a fragment just fine'
+  )
+  t.end()
+})
 test('fill named slot', t=> {
   const actual = html`
 <my-paragraph>

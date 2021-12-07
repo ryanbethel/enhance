@@ -5,7 +5,8 @@ const TEMPLATES = '@architect/views/templates'
 
 module.exports = function Enhancer(options={}) {
   const {
-    templates=TEMPLATES
+    templates = TEMPLATES,
+    fragmentExport = false
   } = options
 
   return function html(strings, ...values) {
@@ -15,8 +16,11 @@ module.exports = function Enhancer(options={}) {
     const moduleNames = [...new Set(customElements.map(node =>  node.tagName))]
     const templateTags = fragment(moduleNames.map(name => template(name, templates)).join(''))
     addTemplateTags(body, templateTags)
-    addScriptStripper(body)
-    return serialize(doc).replace(/__b_\d+/g, '')
+    if (!fragmentExport) {
+      addScriptStripper(body)
+      return serialize(doc).replace(/__b_\d+/g, '')
+    } 
+    else return serialize(doc.childNodes[0].childNodes[1]).replace(/__b_\d+/g, '')
   }
 }
 
@@ -209,6 +213,7 @@ function template(name, path) {
 function addTemplateTags(body, templates) {
   body.childNodes.unshift(...templates.childNodes)
 }
+
 
 function addScriptStripper(body) {
  const stripper = fragment(`<script>Array.from(document.getElementsByTagName("template")).forEach(t => 'SCRIPT' === t.content.lastElementChild.nodeName?document.body.appendChild(t.content.lastElementChild):'')</script>`)
